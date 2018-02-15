@@ -121,10 +121,11 @@ def server_static(filepath):
 
 @route("/update_image", method=["POST"])
 def update_image():
+    d = datetime.now().strftime("%Y:%m:%d:%H:%M:%S")
     user_id = request.get_cookie("user_id", secret="startupcafekoza")
     upload = request.files.get('user_image', "") #画像自体を代入
     name, ext = os.path.splitext(upload.filename) #画像の拡張子をextに代入
-    upload.filename = str(user_id) + ext #画像自体の名前をユーザーid.拡張子　に変更
+    upload.filename = d+str(user_id) + ext #画像自体の名前をユーザーid.拡張子　に変更
     if not upload.filename.lower().endswith(('.png', '.jpg', '.jpeg')):
         return " '.png', '.jpg', '.jpeg'形式のファイルのみをアップロードしてください"
     save_path = get_save_path() #保存する時の相対パスを取得。get_save_pathは下に定義されてる
@@ -134,7 +135,7 @@ def update_image():
     current_image_name = c.fetchone()[0] #古い（現時点の）画像の名前を代入
     if current_image_name != "0.png":  #デフォルトの画像は消させない
         os.remove(save_path+current_image_name) #古い（現時点の）画像を除去
-    c.execute("update user set user_image =? where id=?", (str(user_id)+ext, user_id)) #データベースに画像の名前をユーザーidで保存
+    c.execute("update user set user_image =? where id=?", (d+str(user_id)+ext, user_id)) #データベースに画像の名前をユーザーidで保存
     conn.commit()
     conn.close()
 
